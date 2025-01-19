@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_management/project/project_list_screen.dart';
+import 'package:project_management/project/project_request.dart';
 
 class Projects extends StatefulWidget {
   const Projects({super.key});
@@ -34,7 +35,19 @@ class _ProjectsState extends State<Projects> {
           ),
         ],
       ),
-      body: ProjectListScreen(filter: _selectedFilter), // Pass filter to the list
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to the AddProjectScreen when FAB is pressed
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProjectRequest()),
+          );
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.greenAccent, // Customize color
+      ),
+      body:
+          ProjectListScreen(filter: _selectedFilter), // Pass filter to the list
     );
   }
 }

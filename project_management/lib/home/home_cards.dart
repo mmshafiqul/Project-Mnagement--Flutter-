@@ -22,24 +22,42 @@ class HomeCards extends StatelessWidget {
             physics: NeverScrollableScrollPhysics(),
             // Prevent scrolling in the grid
             children: const [
+              // Total Projects Card
               SummaryCard(
-                title: 'Active Projects',
-                value: '5',
-                icon: Icons.work,
-                color: Colors.blue,
+                title: 'Total Projects',
+                value: '20',
+                icon: Icons.work_outline,
+                color: Colors.purple,
               ),
-              SummaryCard(
-                title: 'Pending Payments',
-                value: '3',
-                icon: Icons.payment,
-                color: Colors.orange,
-              ),
+              // Completed Projects Card
               SummaryCard(
                 title: 'Completed Projects',
                 value: '12',
                 icon: Icons.check_circle,
                 color: Colors.green,
               ),
+              // Active Projects Card
+              SummaryCard(
+                title: 'Active Projects',
+                value: '5',
+                icon: Icons.work,
+                color: Colors.blue,
+              ),
+              // Pending Projects Card
+              SummaryCard(
+                title: 'Pending Projects',
+                value: '3',
+                icon: Icons.pending,
+                color: Colors.orange,
+              ),
+              // Pending Payments Card
+              SummaryCard(
+                title: 'Pending Payments',
+                value: '3',
+                icon: Icons.payment,
+                color: Colors.orange,
+              ),
+              // Total Payments Card
               SummaryCard(
                 title: 'Total Payments',
                 value: '50000',
@@ -61,7 +79,7 @@ class HomeCards extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          const Projects(), // Directly navigate to Projects page
+                      const Projects(), // Directly navigate to Projects page
                     ),
                   );
                 },

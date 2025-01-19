@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_management/home/home_cards.dart';
 import 'package:project_management/home/home_carousel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,6 +11,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Variable to store the client name
+  String? clientName;
+
+  // Method to retrieve client name from SharedPreferences
+  Future<void> _getClientName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      clientName = prefs.getString('clientName');
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getClientName(); // Retrieve the client name on init
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -24,8 +42,14 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10), // Reduced gap between text widgets
+            // Display client's name below "Welcome Back!"
+            Text(
+              clientName != null ? 'Hello, $clientName!' : 'Hello, User!',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10), // Spacing between the name and the next section
             const Text(
-              'Here’s an overview of your projects:',
+              'Here’s an overview of your projects...',
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20), // Keeps space between the text and carousel

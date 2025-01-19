@@ -67,14 +67,16 @@ class _LoginState extends State<Login> {
           if (userData['id'] != null) {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             prefs.setBool('isLoggedIn', true);
-            prefs.setInt("id", userData['id']);  // Ensure userData['id'] is not null
+            prefs.setInt(
+                "id", userData['id']); // Ensure userData['id'] is not null
+            prefs.setString('clientName', userData['name']);
+            prefs.setString('clientEmail', userData['email']);
           }
           // If the login is successful, navigate to the home page
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Layout()),
           );
-
         } else {
           // If the credentials are incorrect
           showDialog(

@@ -5,6 +5,7 @@ import 'package:project_management/notifications/notifications.dart';
 import 'package:project_management/payment/payment.dart';
 import 'package:project_management/project/projects.dart';
 import 'package:project_management/settings/settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Layout extends StatefulWidget {
   const Layout({super.key});
@@ -48,6 +49,24 @@ class _LayoutState extends State<Layout> {
   // Map to track hover state for each tile
   final Map<int, bool> _isHovered = {};
 
+  // User info variables
+  String? userName;
+  String? userEmail;
+
+  // To retrieve the logged-in user's info from SharedPreferences
+  Future<void> _getUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userName = prefs.getString('clientName');
+    userEmail = prefs.getString('clientEmail');
+    setState(() {}); // Refresh the UI after loading user data
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo(); // Retrieve the user info on init
+  }
+
   // Show notifications dialog
   void showNotificationDialog(BuildContext context) {
     showDialog(
@@ -81,14 +100,15 @@ class _LayoutState extends State<Layout> {
                     CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.white,
+                      // Optionally, add a profile picture here
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "client@email.com",
+                      userEmail ?? "client@email.com", // Display user's email
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Client",
+                      userName ?? "Client", // Display user's name
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                     ),
