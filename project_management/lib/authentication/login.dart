@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:project_management/layout/layout.dart'; // Import the home page
+import 'package:http/http.dart' as http;
+import 'package:project_management/layout/layout.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import the home page
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -16,9 +19,9 @@ class _LoginState extends State<Login> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  // Static credentials for testing
-  final String _validEmail = 'test@email.com';
-  final String _validPassword = 'password123';
+  // API URL for login
+
+  final String _loginUrl = 'http://localhost:8080/client/login';
 
   // Function to move focus to the next field
   void _fieldFocusChange(
@@ -27,35 +30,92 @@ class _LoginState extends State<Login> {
     FocusScope.of(context).requestFocus(nextFocus);
   }
 
-  void _login() {
-    // Check if the email and password match the static credentials
-    if (_emailController.text == _validEmail &&
-        _passwordController.text == _validPassword) {
-      // If the credentials are correct, navigate to the home layout
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Layout()),
-      );
-    } else {
-      // Show an error message if the credentials are incorrect
+  Future<void> _login() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Show loading indicator
       showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Invalid Credentials'),
-            content: const Text(
-                'Please check your email and password and try again.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
+          return Center(child: CircularProgressIndicator());
         },
       );
+
+      // Create the login data
+      Map<String, String> loginData = {
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      };
+
+      try {
+        // Make HTTP POST request
+        final response = await http.post(
+          Uri.parse(_loginUrl),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode(loginData),
+        );
+
+        // Close the loading indicator
+        Navigator.of(context).pop();
+
+        if (response.statusCode == 200) {
+          var userData = jsonDecode(response.body);
+          print(userData);
+          // save user id
+          if (userData['id'] != null) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.setBool('isLoggedIn', true);
+            prefs.setInt("id", userData['id']);  // Ensure userData['id'] is not null
+          }
+          // If the login is successful, navigate to the home page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Layout()),
+          );
+
+        } else {
+          // If the credentials are incorrect
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Invalid Credentials'),
+                content: const Text('Please check your email and password.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } catch (e) {
+        // Handle error
+        Navigator.of(context).pop();
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: const Text('An error occurred while logging in.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
@@ -72,7 +132,7 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
         backgroundColor: Colors.greenAccent,
         title:
-        const Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -84,7 +144,8 @@ class _LoginState extends State<Login> {
               // Email Field with rounded borders and green accent
               TextFormField(
                 controller: _emailController,
-                focusNode: _emailFocusNode, // Focus Node for email field
+                focusNode: _emailFocusNode,
+                // Focus Node for email field
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: "email@email.com",
@@ -100,11 +161,8 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: [],
                 textInputAction: TextInputAction.next,
-                // Move to the next field
                 onFieldSubmitted: (_) {
-                  // Automatically move focus to the next field when "Next" is pressed on the keyboard
                   _fieldFocusChange(
                       context, _emailFocusNode, _passwordFocusNode);
                 },
@@ -120,7 +178,8 @@ class _LoginState extends State<Login> {
               // Password Field with rounded borders and green accent
               TextFormField(
                 controller: _passwordController,
-                focusNode: _passwordFocusNode, // Focus Node for password field
+                focusNode: _passwordFocusNode,
+                // Focus Node for password field
                 decoration: InputDecoration(
                   labelText: 'Password',
                   hintText: "Enter password",
@@ -136,11 +195,8 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 obscureText: true,
-                autofillHints: [],
                 textInputAction: TextInputAction.done,
-                // "Done" button on keyboard
                 onFieldSubmitted: (_) {
-                  // Trigger login when user presses "Done"
                   _login();
                 },
                 validator: (value) {
@@ -157,7 +213,7 @@ class _LoginState extends State<Login> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.greenAccent,
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   ),
@@ -189,9 +245,7 @@ class _LoginState extends State<Login> {
                     },
                     style: TextButton.styleFrom(
                         foregroundColor: Colors.black,
-                        backgroundColor:
-                        Colors.greenAccent // Green accent for the text
-                    ),
+                        backgroundColor: Colors.greenAccent),
                     child: const Text(
                       'Register',
                       style: TextStyle(fontWeight: FontWeight.bold),
