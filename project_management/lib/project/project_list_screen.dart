@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:project_management/authentication/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:project_management/authentication/login.dart';
+import 'package:project_management/project/project_card.dart';
+import 'package:project_management/project/project_detail.dart';
+import 'package:project_management/project/project_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-import 'project_detail.dart';
-import 'project_model.dart';
 
 class ProjectListScreen extends StatefulWidget {
   final String filter;
@@ -44,15 +45,13 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
 
   Future<List<Project>> _fetchProjects() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://localhost:8080/project/client/${userId}'));
+      final response = await http.get(Uri.parse('http://localhost:8080/project/client/${userId}'));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         return data.map((json) => Project.fromJson(json)).toList();
       } else {
-        throw Exception(
-            'Failed to load projects. Status code: ${response.statusCode}');
+        throw Exception('Failed to load projects. Status code: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error fetching projects: $e');
@@ -63,7 +62,6 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   void initState() {
     super.initState();
     checkedLoginStatus(context);
-    _projectsFuture = _fetchProjects();
   }
 
   @override
@@ -81,9 +79,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
           List<Project> projects = snapshot.data!;
           List<Project> filteredProjects = widget.filter == 'All'
               ? projects
-              : projects
-                  .where((project) => project.status == widget.filter)
-                  .toList();
+              : projects.where((project) => project.status == widget.filter).toList();
 
           return ListView.builder(
             itemCount: filteredProjects.length,
@@ -95,8 +91,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          ProjectDetail(project: project.toMap()),
+                      builder: (context) => ProjectDetail(project: project.toMap()),
                     ),
                   );
                 },
@@ -105,27 +100,6 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
           );
         }
       },
-    );
-  }
-}
-
-class ProjectCard extends StatelessWidget {
-  final Project project;
-  final VoidCallback onViewDetails;
-
-  const ProjectCard(
-      {Key? key, required this.project, required this.onViewDetails})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        title: Text(project.title),
-        subtitle: Text('Status: ${project.status}'),
-        trailing: TextButton(
-            onPressed: onViewDetails, child: const Text('View Details')),
-      ),
     );
   }
 }
