@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:project_management/home/home_page.dart';
+import 'package:project_management/layout/layout.dart';
 import 'package:project_management/project/project_list_screen.dart';
 import 'package:project_management/project/project_request.dart';
 
@@ -17,6 +19,18 @@ class _ProjectsState extends State<Projects> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.home), // Home icon
+          onPressed: () {
+            // Navigate to the home page when the home icon is clicked
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      Layout()), // Adjust to your actual HomePage class
+            );
+          },
+        ),
         title: const Text("Projects are filtered by"),
         actions: [
           PopupMenuButton<String>(
